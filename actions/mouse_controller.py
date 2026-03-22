@@ -9,10 +9,15 @@ class MouseController:
         self.screen_h = screen_h
         self.prev_x, self.prev_y = 0, 0
         self.smoothening = 5
+        self.dragging = False
 
     def move(self, x, y, frame_w, frame_h):
         screen_x = np.interp(x, (0, frame_w), (0, self.screen_w))
         screen_y = np.interp(y, (0, frame_h), (0, self.screen_h))
+
+        # DEAD ZONE (ignore tiny movements)
+        if abs(screen_x - self.prev_x) < 5 and abs(screen_y - self.prev_y) < 5:
+            return
 
         # Smooth movement
         curr_x = self.prev_x + (screen_x - self.prev_x) / self.smoothening
@@ -24,3 +29,16 @@ class MouseController:
 
     def click(self):
         pyautogui.click()
+    
+    def drag_start(self):
+        if not self.dragging:
+            pyautogui.mouseDown()
+            self.dragging = True
+
+    def drag_end(self):
+        if self.dragging:
+            pyautogui.mouseUp()
+            self.dragging = False
+
+    def scroll(self, amount):
+        pyautogui.scroll(amount)
